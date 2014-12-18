@@ -26,6 +26,13 @@ node["rvm"]["installs"].each do |user, opts|
   # if user hash is not a hash (i.e. set to true), init an empty Hash
   opts = Hash.new if opts == true
 
+  execute 'Adding gpg key' do
+    command "gpg --homedir /home/#{user.to_s}/.gnupg --keyserver hkp://keys.gnupg.net --recv-keys #{node['rvm']['gpg_key']}"
+    user user.to_s
+    only_if 'which gpg'
+    not_if { node['rvm']['gpg_key'].empty? }
+  end
+
   rvm_installation(user.to_s) do
     %w(installer_url installer_flags install_pkgs rvmrc_template_source
       rvmrc_template_cookbook rvmrc_env action
